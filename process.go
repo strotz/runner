@@ -106,6 +106,18 @@ func (p *Process) RunUntilExit() {
 	}
 }
 
+// SendSignal sends a signal to the process. It is a blocking call.
+func (p *Process) SendSignal(s os.Signal) error {
+	log.Println("Sending signal:", s, "to process:", p.shortName, p.cmd.Process.Pid)
+	if p.cmd.Process == nil {
+		return errors.New("process is not running")
+	}
+	if err := p.cmd.Process.Signal(s); err != nil {
+		return fmt.Errorf("failed to send signal %s to process %s: %w", s, p.shortName, err)
+	}
+	return nil
+}
+
 func (p *Process) Kill() {
 	log.Println("Killing process:", p.shortName, p.cmd.Process.Pid)
 	if err := p.cmd.Process.Kill(); err != nil {
