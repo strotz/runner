@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"io"
 	"log"
+	"log/slog"
 	"os"
 	"os/exec"
 	"path"
@@ -24,12 +25,15 @@ type Process struct {
 
 // NewProcess creates a new Process for the given executable name and arguments.
 // It pipes stdout and stderr through formatted printers and sniffers for searchable output.
-func NewProcess(ctx context.Context, name string, args ...string) (*Process, error) {
+func NewProcess(ctx context.Context, env []string, name string, args ...string) (*Process, error) {
 	_, fileName := path.Split(name)
 	cmd := exec.CommandContext(ctx, name, args...)
+	if env != nil {
+		cmd.Env = env
+	}
 	c := cmd.Cancel
 	cmd.Cancel = func() error {
-		log.Println("Cancel called for ", fileName)
+		slog.Debug("Cancel called for ", "fileName", fileName)
 		return c()
 	}
 	// Pipe stdout and stderr of the process to the test execution stderr.

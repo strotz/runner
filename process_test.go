@@ -15,7 +15,7 @@ import (
 func TestNotStarted(t *testing.T) {
 	ctx, cancel := context.WithTimeout(context.TODO(), 50*time.Second)
 	defer cancel()
-	p, err := NewProcess(ctx, "bash", "-c", "sleep 0.5 && echo hello && echo world 1>&2")
+	p, err := NewProcess(ctx, nil, "bash", "-c", "sleep 0.5 && echo hello && echo world 1>&2")
 	require.NoError(t, err)
 
 	// TODO (Alexei): should be false, process not started
@@ -30,7 +30,7 @@ func TestNotStarted(t *testing.T) {
 func TestSearchOutputAfterExit(t *testing.T) {
 	ctx, cancel := context.WithTimeout(context.TODO(), 50*time.Second)
 	defer cancel()
-	p, err := NewProcess(ctx, "bash", "-c", "sleep 0.5 && echo hello && echo world 1>&2")
+	p, err := NewProcess(ctx, nil, "bash", "-c", "sleep 0.5 && echo hello && echo world 1>&2")
 	require.NoError(t, err)
 	var wg sync.WaitGroup
 	err = p.StartAsync(&wg)
@@ -58,7 +58,7 @@ func TestSearchOutputAfterExit(t *testing.T) {
 func TestSearchWhileWorking(t *testing.T) {
 	ctx := context.TODO()
 	// Long operation with 2 messages
-	p, err := NewProcess(ctx, "bash", "-c", "echo hello && sleep 5 && echo world && sleep 5")
+	p, err := NewProcess(ctx, nil, "bash", "-c", "echo hello && sleep 5 && echo world && sleep 5")
 	require.NoError(t, err)
 	var wg sync.WaitGroup
 	err = p.StartAsync(&wg)
@@ -90,7 +90,7 @@ func TestSearchWhileWorking(t *testing.T) {
 func TestSplit(t *testing.T) {
 	t.Run("empty input", func(t *testing.T) {
 		lines := splitLines([]byte(""))
-		require.Equal(t, [][]byte{[]byte{}}, lines)
+		require.Equal(t, [][]byte{{}}, lines)
 	})
 
 	t.Run("split with line separator", func(t *testing.T) {
@@ -113,7 +113,7 @@ func TestWaitRepeatedly(t *testing.T) {
 	var wg sync.WaitGroup
 
 	// Long operation with 2 repeated messages
-	p, err := NewProcess(t.Context(), "bash", "-c", "echo hello && echo hello")
+	p, err := NewProcess(t.Context(), nil, "bash", "-c", "echo hello && echo hello")
 	require.NoError(t, err)
 	require.NoError(t, p.StartAsync(&wg))
 
@@ -126,7 +126,7 @@ func TestProcessCancelContext(t *testing.T) {
 	var wg sync.WaitGroup
 
 	// Long operation with 2 repeated messages
-	p, err := NewProcess(t.Context(), "bash", "-c", "echo hello && echo hello && sleep 500000")
+	p, err := NewProcess(t.Context(), nil, "bash", "-c", "echo hello && echo hello && sleep 500000")
 	require.NoError(t, err)
 	require.NoError(t, p.StartAsync(&wg))
 
